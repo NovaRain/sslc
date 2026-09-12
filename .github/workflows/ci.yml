@@ -261,23 +261,37 @@ jobs:
       - name: Clone
         uses: actions/checkout@v4
 
-      - name: Configure & build (Alpine/musl Docker)
-        # i386/alpine gives a native 32-bit musl environment, so -m32 and
-        # cross-compilation are not needed - gcc here is already 32-bit musl gcc.
-        # The CMakeLists.txt USE_MUSL option is not used in this path since
-        # the compiler inside the container is already musl-based.
+      - name: Cache musl toolchain
+        id: cache-musl
+        uses: actions/cache@v4
+        with:
+          path: /opt/i686-linux-musl-cross
+          key: i686-linux-musl-cross-v1
+
+      - name: Download musl toolchain
+        if: steps.cache-musl.outputs.cache-hit != 'true'
         run: |
-          docker run --rm \
-            -v $(pwd):/src \
-            -w /src \
-            i386/alpine:latest \
-            sh -c '
-              apk add --no-cache cmake make gcc g++ musl-dev &&
-              mkdir -p out &&
-              cd out &&
-              cmake .. &&
-              make
-            '
+          # Toolchain hosted as a release asset in this repo to avoid
+          # reliance on musl.cc (blocked GHA due to abuse).
+          # Upload i686-linux-musl-cross.tgz to:
+          #   https://github.com/NovaRain/sslc/releases/tag/toolchain
+          curl -L https://github.com/NovaRain/sslc/releases/download/toolchain/i686-linux-musl-cross.tgz \
+            | sudo tar xz -C /opt
+
+      - name: Add musl toolchain to PATH
+        run: echo "/opt/i686-linux-musl-cross/bin" >> $GITHUB_PATH
+
+      - name: Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake make
+
+      - name: Configure & build
+        run: |
+          mkdir out
+          cd out
+          cmake .. -DUSE_MUSL=ON
+          make
 
       - name: Test
         continue-on-error: true
