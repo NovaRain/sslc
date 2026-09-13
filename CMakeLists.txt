@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 set(EXECUTABLE_NAME sslc)
 
-project(${EXECUTABLE_NAME})
+project(${EXECUTABLE_NAME} C)
 
 # Option to build with musl libc for a portable, GLIBC-independent binary
 option(USE_MUSL "Build with musl libc (static, no GLIBC dependency)" OFF)
