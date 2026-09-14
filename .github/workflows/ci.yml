@@ -276,10 +276,13 @@ jobs:
               mkdir -p out &&
               cd out &&
               cmake .. \
-              -DCMAKE_C_FLAGS="-Os -ffunction-sections -fdata-sections" \
+              -DCMAKE_C_FLAGS="-ffunction-sections -fdata-sections" \
               -DCMAKE_EXE_LINKER_FLAGS="-static -Wl,--gc-sections" &&
               make
             '
+
+      - name: Strip binary
+        run: docker run --rm -v $(pwd):/src -w /src i386/alpine:latest strip out/bin/sslc
 
       - name: Test
         continue-on-error: true
