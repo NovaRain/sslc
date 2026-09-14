@@ -272,17 +272,13 @@ jobs:
             -w /src \
             i386/alpine:latest \
             sh -c '
-              apk add --no-cache cmake make gcc musl-dev &&
+              apk add --no-cache cmake make gcc musl-dev binutils &&
               mkdir -p out &&
               cd out &&
-              cmake .. \
-              -DCMAKE_C_FLAGS="-ffunction-sections -fdata-sections" \
-              -DCMAKE_EXE_LINKER_FLAGS="-static -Wl,--gc-sections" &&
+              cmake .. -DCMAKE_C_FLAGS="-ffunction-sections -fdata-sections" -DCMAKE_EXE_LINKER_FLAGS="-static -Wl,--gc-sections" &&
               make
+              strip bin/sslc
             '
-
-      - name: Strip binary
-        run: docker run --rm -v $(pwd):/src -w /src i386/alpine:latest strip out/bin/sslc
 
       - name: Test
         continue-on-error: true
