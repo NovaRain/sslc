@@ -275,7 +275,7 @@ jobs:
               apk add --no-cache cmake make gcc musl-dev &&
               mkdir -p out &&
               cd out &&
-              cmake .. &&
+              cmake .. -DCMAKE_EXE_LINKER_FLAGS="-static" &&
               make
             '
 
